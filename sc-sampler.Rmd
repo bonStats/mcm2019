@@ -1,0 +1,260 @@
+---
+title: "Scaling samplers for high-dimensional models with stochastic nets"
+subtitle: "<br>"
+author: "Joshua J Bon<br>Queensland University of Technology<br>MCM2019 -- July 11th"
+institute: ""
+date: ""
+output:
+  xaringan::moon_reader:
+    css: ["default", "default-fonts","bon-beach-title.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      
+---
+
+```{r setup, load_refs, include=FALSE, cache=FALSE}
+library(RefManageR)
+BibOptions(check.entries = FALSE,
+           bib.style = "authoryear",
+           cite.style = "authoryear",
+           style = "html",
+           hyperlink = FALSE,
+           dashed = FALSE)
+myBib <- ReadBib("bib-sc-sampler.bib", check = FALSE)
+
+library(ggplot2)
+source("one-dim-sc-example-viz.R")
+
+```
+
+## Talk outline
+<br>
+1. **Bayesian Lasso**: An interesting reinterpretation (at least to me). 
+<br><br><br>
+2. **Stochastic constraints variables**: Is this even a good name?
+<br><br><br>
+3. **Stochastic nets**: Continuous shrinkage priors as stochastic constraints.
+<br><br><br>
+4. **Geometry**: I'll show some pictures.
+<br><br><br>
+5. **A new Gibbs sampler**: A bit speedy, more stable.
+
+---
+
+## The Lasso 
+
+```{r aqua-lasso-1, echo=FALSE, eval=TRUE}
+knitr::include_graphics("imgs/aquaman-hammerhead-1967-cartoon.JPG")
+```
+
+<!--- If aquaman can use a lasso under water, what can I do? "Weird" ---> 
+
+---
+
+## The standard Lasso
+
+### Lagrangian form
+
+$$\max_{\boldsymbol{\theta} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x}|\boldsymbol{\theta}) + \lambda \Vert \boldsymbol{\theta} \Vert_{1}$$
+
+### Constrained form
+
+$$			\max_{\tilde{\boldsymbol{\theta}} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x}|\tilde{\boldsymbol{\theta}}) \quad\text{ s.t. } \quad \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}$$
+
+```{r tib-ref, echo=FALSE, eval=FALSE, results='asis'}
+cat("<br><br><br> see ",Citet("Tibshirani1996", bib = myBib))
+```
+
+---
+
+## The Bayesian Lasso
+
+### Standard probabilistic model:
+
+$$(\boldsymbol{x}|\boldsymbol{\theta}) \sim \pi(\boldsymbol{x}|\boldsymbol{\theta})$$
+$$\boldsymbol{\theta} \overset{\text{iid}}{\sim} \text{Exp}(\lambda)$$
+
+### Constrained probabilistic model:
+
+$$(\boldsymbol{x} \vert \boldsymbol{\theta}) \sim \pi(\boldsymbol{x} \vert \boldsymbol{\theta}) $$
+
+$$(\boldsymbol{\theta},\omega) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\omega}\;\; \text{s.t.}\;\; \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}) $$
+
+$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad \tilde{\omega} \sim \text{Exp}(\lambda)$$
+<!--- More complicated, but exposes inner facets, Marginalising over $\omega$ results in the original Bayesian Lasso. --->
+
+---
+
+## The constrained Bayesian Lasso
+
+This looks suspiciously like changing the constrained Lasso
+
+$$\max_{\tilde{\boldsymbol{\theta}} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x} \vert \tilde{\boldsymbol{\theta}}) \quad\text{ s.t. } \quad \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}$$
+
+to a Bayesian problem by setting priors
+
+$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad
+\tilde{\omega} \sim \text{Exp}(\lambda)$$
+
+just as we had with stochastic constraints.
+<!--- 
+	\item Closer connection between Bayesian and standard Lasso
+	\item Connected by more than just the MAP
+\end{itemize} --->
+
+
+---
+
+## Overview
+
+| *Inference*  | *Regularisation*                                          |
+|--------------|-----------------------------------------------------------|
+| Optimisation | Penalty $\Longleftrightarrow$ constraint                  |
+| Bayesian     | Prior   $\Longleftrightarrow$ stochastic constraint prior |
+
+
+---
+
+## Stochastic constraint framework
+
+### Components 
+
+|||
+|-------------------------|--------------|
+| Base prior             | $\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}}, \quad \tilde{\boldsymbol{\theta}} \in \Theta \subseteq \mathbb{R}^{p}$ |
+| Constraint variable      | $\tilde{\boldsymbol{\omega}} \sim f_{\tilde{\boldsymbol{\omega}}}, \quad \tilde{\boldsymbol{\omega}} \in \Omega \subseteq \mathbb{R}^{q}$ |
+| Penalty function  | $\boldsymbol{r}(\boldsymbol{\theta}): \qquad \Theta \rightarrow \Omega$ |
+
+<!---#### Base prior: 
+
+$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}}, \quad \tilde{\boldsymbol{\theta}} \in \Theta \subseteq \mathbb{R}^{p}$.
+    
+#### Constraint variable: 
+
+$\tilde{\boldsymbol{\omega}} \sim f_{\tilde{\boldsymbol{\omega}}}, \quad \tilde{\boldsymbol{\omega}} \in \Omega \subseteq \mathbb{R}^{q}$
+    
+#### Penalty function: 
+
+$\boldsymbol{r}(\boldsymbol{\theta}): \Theta \rightarrow \Omega$ -->
+
+---
+
+## Stochastic constraint framework
+
+### Structure
+
+$$(\boldsymbol{\theta}, \boldsymbol{\omega} \vert \boldsymbol{\lambda}) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}} \;\vert\;  \boldsymbol{r}(\tilde{\boldsymbol{\theta}}) \preceq \tilde{\boldsymbol{\omega}}, \boldsymbol{\lambda})$$
+
+$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}}$$ 
+$$(\tilde{\boldsymbol{\omega}} \vert \boldsymbol{\lambda}) \sim f_{\tilde{\boldsymbol{\omega}}  \vert \boldsymbol{\lambda}}$$
+
+The joint support of the joint distribution $(\tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}})$ is constrained element-wise by the inequality $\boldsymbol{r}(\tilde{\boldsymbol{\theta}} ) \preceq \tilde{\boldsymbol{\omega}}$.
+
+
+---
+
+## Examples
+
+```{r aqua-lasso-2, echo=FALSE, eval=TRUE,  out.width = 732, out.height = 488}
+knitr::include_graphics("imgs/aquaman-lasso2.gif")
+```
+
+---
+
+## 1D example
+
+| Base prior | Penalty | Constraint |
+|------------|---------|------------|
+| $\text{N}(0,1)$ | $-$ | $-$ |
+
+```{r sc-example-1, echo=FALSE, eval=TRUE, out.width = 600, out.height = 400, fig.align='center'}
+print(plot_normal)
+```
+
+---
+
+## 1D example
+
+| Base prior | Penalty | Constraint |
+|------------|---------|------------|
+| $\text{N}(0,1)$ | $\vert\theta\vert$ | $\text{Exp}(1)$ |
+
+```{r sc-example-2, echo=FALSE, eval=TRUE, out.width = 600, out.height = 400, fig.align='center'}
+print(plot_normal_l1_exp)
+```
+
+---
+
+## 1D example
+
+| Base prior | Penalty | Constraint |
+|------------|---------|------------|
+| $\text{N}(0,1)$ | $\vert\theta\vert$ | $\text{Gamma}(0.5,1)$ |
+
+```{r sc-example-3, echo=FALSE, eval=TRUE, out.width = 600, out.height = 400, fig.align='center'}
+print(plot_normal_l1_gamma)
+```
+
+---
+
+## Horseshoe prior
+
+$$(\boldsymbol{\theta}, \boldsymbol{\omega} \;\vert\; \boldsymbol{\lambda}) \overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}} \;\vert\; \tilde{\theta}_{i}^{2} \leq \tilde{\omega}_{i} \;\forall i \in P, \boldsymbol{\lambda} \right)$$
+$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1$$
+$$(\tilde{\omega}_{i}\vert\lambda_{i},\tau) \sim \text{Exp}(2^{-1} [\lambda_{i}\tau]^{-2})$$
+$$\lambda_{i} \sim \text{Cauchy}_{+}(0,1)$$
+$$\tau  \sim \text{Cauchy}_{+}(0,1)$$
+$$\text{for } i \in P = \{1,2,3,\ldots,p\}$$
+
+Similar representation exist for
+- Scale-normal mixtures
+- Regularised-horseshoe
+- Dirichlet-Laplace
+- R2-D2 priors
+
+<!--- Add box around SC part to demo marginalisation?--->
+
+---
+
+## Stochastic nets
+
+- Explanation of name... stochastic constraints for 
+
+- Random sample from normal, only take those inside diamond. animation
+
+---
+
+## Intuition for method
+
+- Classic technique... block-update
+- Picture of skinny diamond shape
+- 
+
+---
+
+## Gibbs sampler for continuous-shrinkage priors
+
+- 
+
+---
+
+## SC-Gibbs sampler for continuous-shrinkage priors
+
+- 
+
+---
+
+## Results on some toy problems
+
+- 
+
+---
+
+## Conclusions
+
+---
+
+## References

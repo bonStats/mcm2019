@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Scaling samplers for high-dimensional models with stochastic nets</title>
+    <meta charset="utf-8" />
+    <meta name="author" content=" Joshua J Bon Queensland University of Technology MCM2019 – July 11th" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="bon-beach-title.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Scaling samplers for high-dimensional models with stochastic nets
+## <br>
+### <br>Joshua J Bon<br>Queensland University of Technology<br>MCM2019 – July 11th<br><br>
+
+---
+
+
+
+
+## Talk outline
+&lt;br&gt;
+1. **Bayesian Lasso**: An interesting reinterpretation (at least to me). 
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+2. **Stochastic constraints variables**: Is this even a good name?
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+3. **Stochastic nets**: Continuous shrinkage priors as stochastic constraints.
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+4. **Geometry**: I'll show some pictures.
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+5. **A new Gibbs sampler**: A bit speedy, more stable.
+
+---
+
+## The Lasso 
+
+&lt;img src="imgs/aquaman-hammerhead-1967-cartoon.JPG" width="831" /&gt;
+
+&lt;!--- If aquaman can use a lasso under water, what can I do? "Weird" ---&gt; 
+
+---
+
+## The standard Lasso
+
+### Lagrangian form
+
+`$$\max_{\boldsymbol{\theta} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x}|\boldsymbol{\theta}) + \lambda \Vert \boldsymbol{\theta} \Vert_{1}$$`
+
+### Constrained form
+
+`$$			\max_{\tilde{\boldsymbol{\theta}} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x}|\tilde{\boldsymbol{\theta}}) \quad\text{ s.t. } \quad \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}$$`
+
+
+
+---
+
+## The Bayesian Lasso
+
+### Standard probabilistic model:
+
+`$$(\boldsymbol{x}|\boldsymbol{\theta}) \sim \pi(\boldsymbol{x}|\boldsymbol{\theta})$$`
+`$$\boldsymbol{\theta} \overset{\text{iid}}{\sim} \text{Exp}(\lambda)$$`
+
+### Constrained probabilistic model:
+
+$$(\boldsymbol{x} \vert \boldsymbol{\theta}) \sim \pi(\boldsymbol{x} \vert \boldsymbol{\theta}) $$
+
+$$(\boldsymbol{\theta},\omega) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}},\tilde{\omega}\;\; \text{s.t.}\;\; \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}) $$
+
+`$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad \tilde{\omega} \sim \text{Exp}(\lambda)$$`
+&lt;!--- More complicated, but exposes inner facets, Marginalising over `\(\omega\)` results in the original Bayesian Lasso. ---&gt;
+
+---
+
+## The constrained Bayesian Lasso
+
+This looks suspiciously like changing the constrained Lasso
+
+`$$\max_{\tilde{\boldsymbol{\theta}} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x} \vert \tilde{\boldsymbol{\theta}}) \quad\text{ s.t. } \quad \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}$$`
+
+to a Bayesian problem by setting priors
+
+`$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad
+\tilde{\omega} \sim \text{Exp}(\lambda)$$`
+
+just as we had with stochastic constraints.
+&lt;!--- 
+	\item Closer connection between Bayesian and standard Lasso
+	\item Connected by more than just the MAP
+\end{itemize} ---&gt;
+
+
+---
+
+## Overview
+
+| *Inference*  | *Regularisation*                                          |
+|--------------|-----------------------------------------------------------|
+| Optimisation | Penalty `\(\Longleftrightarrow\)` constraint                  |
+| Bayesian     | Prior   `\(\Longleftrightarrow\)` stochastic constraint prior |
+
+
+---
+
+## Stochastic constraint framework
+
+### Components 
+
+|||
+|-------------------------|--------------|
+| Base prior             | `\(\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}}, \quad \tilde{\boldsymbol{\theta}} \in \Theta \subseteq \mathbb{R}^{p}\)` |
+| Constraint variable      | `\(\tilde{\boldsymbol{\omega}} \sim f_{\tilde{\boldsymbol{\omega}}}, \quad \tilde{\boldsymbol{\omega}} \in \Omega \subseteq \mathbb{R}^{q}\)` |
+| Penalty function  | `\(\boldsymbol{r}(\boldsymbol{\theta}): \qquad \Theta \rightarrow \Omega\)` |
+
+&lt;!---#### Base prior: 
+
+`\(\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}}, \quad \tilde{\boldsymbol{\theta}} \in \Theta \subseteq \mathbb{R}^{p}\)`.
+    
+#### Constraint variable: 
+
+`\(\tilde{\boldsymbol{\omega}} \sim f_{\tilde{\boldsymbol{\omega}}}, \quad \tilde{\boldsymbol{\omega}} \in \Omega \subseteq \mathbb{R}^{q}\)`
+    
+#### Penalty function: 
+
+`\(\boldsymbol{r}(\boldsymbol{\theta}): \Theta \rightarrow \Omega\)` --&gt;
+
+---
+
+## Stochastic constraint framework
+
+### Structure
+
+`$$(\boldsymbol{\theta}, \boldsymbol{\omega} \vert \boldsymbol{\lambda}) \overset{\text{d}}{=} (\tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}} \;\vert\;  \boldsymbol{r}(\tilde{\boldsymbol{\theta}}) \preceq \tilde{\boldsymbol{\omega}}, \boldsymbol{\lambda})$$`
+
+`$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}}$$` 
+`$$(\tilde{\boldsymbol{\omega}} \vert \boldsymbol{\lambda}) \sim f_{\tilde{\boldsymbol{\omega}}  \vert \boldsymbol{\lambda}}$$`
+
+The joint support of the joint distribution `\((\tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}})\)` is constrained element-wise by the inequality `\(\boldsymbol{r}(\tilde{\boldsymbol{\theta}} ) \preceq \tilde{\boldsymbol{\omega}}\)`.
+
+
+---
+
+## Examples
+
+&lt;img src="imgs/aquaman-lasso2.gif" width="732" height="488" /&gt;
+
+---
+
+## 1D example
+
+| Base prior | Penalty | Constraint |
+|------------|---------|------------|
+| `\(\text{N}(0,1)\)` | `\(-\)` | `\(-\)` |
+
+&lt;img src="sc-sampler_files/figure-html/sc-example-1-1.png" width="600" height="400" style="display: block; margin: auto;" /&gt;
+
+---
+
+## 1D example
+
+| Base prior | Penalty | Constraint |
+|------------|---------|------------|
+| `\(\text{N}(0,1)\)` | `\(\vert\theta\vert\)` | `\(\text{Exp}(1)\)` |
+
+&lt;img src="sc-sampler_files/figure-html/sc-example-2-1.png" width="600" height="400" style="display: block; margin: auto;" /&gt;
+
+---
+
+## 1D example
+
+| Base prior | Penalty | Constraint |
+|------------|---------|------------|
+| `\(\text{N}(0,1)\)` | `\(\vert\theta\vert\)` | `\(\text{Gamma}(0.5,1)\)` |
+
+&lt;img src="sc-sampler_files/figure-html/sc-example-3-1.png" width="600" height="400" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Horseshoe prior
+
+`$$(\boldsymbol{\theta}, \boldsymbol{\omega} \;\vert\; \boldsymbol{\lambda}) \overset{\text{d}}{=} \left( \tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}} \;\vert\; \tilde{\theta}_{i}^{2} \leq \tilde{\omega}_{i} \;\forall i \in P, \boldsymbol{\lambda} \right)$$`
+`$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1$$`
+`$$(\tilde{\omega}_{i}\vert\lambda_{i},\tau) \sim \text{Exp}(2^{-1} [\lambda_{i}\tau]^{-2})$$`
+`$$\lambda_{i} \sim \text{Cauchy}_{+}(0,1)$$`
+`$$\tau  \sim \text{Cauchy}_{+}(0,1)$$`
+`$$\text{for } i \in P = \{1,2,3,\ldots,p\}$$`
+
+Similar representation exist for
+- Scale-normal mixtures
+- Regularised-horseshoe
+- Dirichlet-Laplace
+- R2-D2 priors
+
+&lt;!--- Add box around SC part to demo marginalisation?---&gt;
+
+---
+
+## Stochastic nets
+
+- Explanation of name... stochastic constraints for 
+
+- Random sample from normal, only take those inside diamond. animation
+
+---
+
+## Intuition for method
+
+- Classic technique... block-update
+- Picture of skinny diamond shape
+- 
+
+---
+
+## Gibbs sampler for continuous-shrinkage priors
+
+- 
+
+---
+
+## SC-Gibbs sampler for continuous-shrinkage priors
+
+- 
+
+---
+
+## Results on some toy problems
+
+- 
+
+---
+
+## Conclusions
+
+---
+
+## References
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

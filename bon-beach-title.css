@@ -1,0 +1,14 @@
+.title-slide {
+  background-image: url(imgs/cotton-tree.jpg);
+  background-size: cover;
+  text-shadow: 0 0 80px #333;
+}
+
+.title-slide h3 {
+  color: #013178;
+  background-color: #FFFFFF;
+}
+
+.title-slide .remark-slide-number {
+  display: none;
+}
