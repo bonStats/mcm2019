@@ -1,6 +1,6 @@
 ---
 title: "Scaling samplers for high-dimensional models with stochastic nets"
-subtitle: "<br>"
+subtitle: "<br><br>"
 author: "Joshua J Bon<br>Queensland University of Technology<br>MCM2019 -- July 11th"
 institute: ""
 date: ""
@@ -34,13 +34,13 @@ source("one-dim-sc-example-viz.R")
 <br>
 1. **Bayesian Lasso**: An interesting reinterpretation (at least to me). 
 <br><br><br>
-2. **Stochastic constraints variables**: Is this even a good name?
+2. **Stochastic constraints variables**: A good name?
 <br><br><br>
 3. **Stochastic nets**: Continuous shrinkage priors as stochastic constraints.
 <br><br><br>
-4. **Geometry**: I'll show some pictures.
+4. **Geometry**: I'll show some pictures and wave my hands.
 <br><br><br>
-5. **A new Gibbs sampler**: A bit speedy, more stable.
+5. **A new Gibbs sampler**: A bit speedy, more stable. *Or the MC part*.
 
 ---
 
@@ -91,14 +91,14 @@ $$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qq
 ## The constrained Bayesian Lasso
 
 This looks suspiciously like changing the constrained Lasso
-
+<br><br>
 $$\max_{\tilde{\boldsymbol{\theta}} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x} \vert \tilde{\boldsymbol{\theta}}) \quad\text{ s.t. } \quad \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}$$
-
+<br>
 to a Bayesian problem by setting priors
-
+<br><br>
 $$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad
 \tilde{\omega} \sim \text{Exp}(\lambda)$$
-
+<br>
 just as we had with stochastic constraints.
 <!--- 
 	\item Closer connection between Bayesian and standard Lasso
@@ -108,13 +108,18 @@ just as we had with stochastic constraints.
 
 ---
 
-## Overview
+## Duality and analogy to regularisation
+<br><br><br>
 
 | *Inference*  | *Regularisation*                                          |
 |--------------|-----------------------------------------------------------|
 | Optimisation | Penalty $\Longleftrightarrow$ constraint                  |
 | Bayesian     | Prior   $\Longleftrightarrow$ stochastic constraint prior |
 
+--
+
+<br><br>
+The duality between stochastic constraint priors and their standard representation is analagous to the duality between penalty and constraint regularisation in optimisation.
 
 ---
 
@@ -127,6 +132,20 @@ just as we had with stochastic constraints.
 | Base prior             | $\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}}, \quad \tilde{\boldsymbol{\theta}} \in \Theta \subseteq \mathbb{R}^{p}$ |
 | Constraint variable      | $\tilde{\boldsymbol{\omega}} \sim f_{\tilde{\boldsymbol{\omega}}}, \quad \tilde{\boldsymbol{\omega}} \in \Omega \subseteq \mathbb{R}^{q}$ |
 | Penalty function  | $\boldsymbol{r}(\boldsymbol{\theta}): \qquad \Theta \rightarrow \Omega$ |
+
+--
+
+**Key idea**: Truncation is applied *jointly* to base and constraint variables.
+
+--
+
+**Connections**
+
+- Scale mixture of normals
+- Scale mixture of uniforms
+- Slice sampling
+- Skew random variables
+- Exponentially tilted random variables
 
 <!---#### Base prior: 
 
@@ -208,12 +227,13 @@ $$(\tilde{\omega}_{i}\vert\lambda_{i},\tau) \sim \text{Exp}(2^{-1} [\lambda_{i}\
 $$\lambda_{i} \sim \text{Cauchy}_{+}(0,1)$$
 $$\tau  \sim \text{Cauchy}_{+}(0,1)$$
 $$\text{for } i \in P = \{1,2,3,\ldots,p\}$$
+--
 
-Similar representation exist for
+Similar representations exist for
 - Scale-normal mixtures
 - Regularised-horseshoe
 - Dirichlet-Laplace
-- R2-D2 priors
+- R2-D2 prior
 
 <!--- Add box around SC part to demo marginalisation?--->
 
@@ -221,39 +241,135 @@ Similar representation exist for
 
 ## Stochastic nets
 
-- Explanation of name... stochastic constraints for 
+I refer to the family of stochastic constraint priors that contain continuous shrinkage priors (horseshoe etc.) as *stochastic nets*.
 
-- Random sample from normal, only take those inside diamond. animation
+**... why?**
 
----
+--
 
-## Intuition for method
-
-- Classic technique... block-update
-- Picture of skinny diamond shape
-- 
+```{r aqua-flying-fish, echo=FALSE, eval=TRUE, fig.align='center'}
+knitr::include_graphics("imgs/aquaman-flying-fish.gif")
+```
 
 ---
 
-## Gibbs sampler for continuous-shrinkage priors
+## Visualisation of generative process
 
-- 
+$$(x,y) \sim \text{N}(0,1)$$
+$$\boldsymbol{\lambda} \sim \text{Dir}(1,1)$$
+
+$$\tau \sim \text{Exp}(2)$$
+
+$$\text{s.t. } \lambda_{1}\vert x \vert + \lambda_{2}\vert y \vert \leq \tau$$
+
+```{r sc-reject-gif, echo=FALSE, eval=TRUE, fig.align='center'}
+knitr::include_graphics("imgs/sc-rejection-viz1.gif")
+```
 
 ---
 
-## SC-Gibbs sampler for continuous-shrinkage priors
+## Visualisation of generative process
 
-- 
+$$(x,y) \sim \text{N}(0,1)$$
+$$\boldsymbol{\lambda} \sim \text{Dir}(1,1)$$
+
+$$\tau \sim \text{Exp}(2)$$
+
+$$\text{s.t. } \lambda_{1}\vert x \vert + \lambda_{2}\vert y \vert \leq \tau$$
+
+```{r sc-reject-pause, echo=FALSE, eval=TRUE, fig.align='center'}
+knitr::include_graphics("imgs/sc-rejection-viz1-pause.png")
+```
+
+---
+
+## A stochastic net: constraining variables
+
+```{r sc-reject-shape, echo=FALSE, eval=TRUE, fig.align='center', out.height=500, out.width=600}
+knitr::include_graphics("imgs/sc-rej-shape-only.png")
+```
+
+---
+
+## Gibbs samplers for continuous-shrinkage priors
+
+### Ingredients of standard algorithm
+
+--
+
+(a) Sample $(\boldsymbol{\beta}~\vert~ \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{N}(\boldsymbol{\mu},\boldsymbol{V})$.
+   - $\boldsymbol{\mu} = \boldsymbol{V}\boldsymbol{X}^{\top}\boldsymbol{y}$
+   - $\boldsymbol{V} = (\boldsymbol{X}^{\top}\boldsymbol{X} + \boldsymbol{S}^{-1})^{-1}$
+   - $\boldsymbol{S}$ = diagonal matrix from $\boldsymbol{\lambda}$ and $\tau$.
+
+--
+
+(b) Sample $(\sigma^2~\vert~\boldsymbol{\beta}, \boldsymbol{\lambda}, \tau) \sim \text{IG}(a_{1},a_{2})$
+
+--
+
+(c) Sample $(\boldsymbol{\lambda}~\vert~\boldsymbol{\beta}, \sigma^2, \tau)$
+
+--
+
+(d) Sample $(\tau~\vert~ \boldsymbol{\beta}, \boldsymbol{\lambda}, \sigma^2)$
+
+--
+
+**Q:** What is the computational bottleneck of this algorithm?
+
+--
+
+Inverting $\boldsymbol{V}$ (or decomposing) is $\mathcal{O}(p^3)$.
+
+---
+
+## Gibbs samplers for continuous-shrinkage priors
+
+### Truncated-Gibbs sampler
+
+**Aim**: Exploit the geometry learned by decomposing the prior to create a better Gibbs sampler.
+
+--
+
+(a1) Sample $(\boldsymbol{\omega}~\vert~\boldsymbol{\beta}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{sExp}(b_1)$
+   
+   - Use information about current magnitude to infer
+
+(a2)
+
+
+**Complexity**:
 
 ---
 
 ## Results on some toy problems
 
-- 
+### Model:
+
+---
+
+## Results on some toy problems
+
+### Error:
+
+---
+
+## Results on some toy problems
+
+### Time:
 
 ---
 
 ## Conclusions
+
+- Other areas under investigation:
+
+   - Theorectical results
+
+   - Prior construction
+   
+   - Variable selection from continuous-shrinkage prior
 
 ---
 
