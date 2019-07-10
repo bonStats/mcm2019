@@ -346,7 +346,7 @@ knitr::include_graphics("imgs/sc-rej-shape-only.png")
 
 --
 
-(a2) Sample $(\beta_{i}~\vert~ \boldsymbol{\beta}_{(i)},\boldsymbol{\omega}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{U}(-\omega_{i}^{1/\nu},\omega_{i}^{1/\nu})$ with MH correction.
+(a2) Sample $(\beta_{i}~\vert~ \boldsymbol{\beta}_{(i)},\boldsymbol{\omega}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{U}(-\omega_{i}^{1/\nu},\omega_{i}^{1/\nu})$ with MH correction for $i \in I$.
 
 --
 
@@ -356,16 +356,32 @@ knitr::include_graphics("imgs/sc-rej-shape-only.png")
 
 (a3) Sample $(\boldsymbol{\beta}_{J}~\vert~ \boldsymbol{\beta}_{I}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{N}(\boldsymbol{\mu}_{J|I},\boldsymbol{V}_{J|I})$.
 
+--
+
    - Note: $\boldsymbol{\omega}$ marginalised out. Not neccesary, but practical.
 
 
-**Complexity**: $\mathcal{O}(\vert J \vert^{3} + p \vert I\vert)$.
+---
+
+## Gibbs samplers for continuous-shrinkage priors
+
+### Truncated-Gibbs sampler
+
+**Aim**: Exploit the geometry by decomposing the prior to create a better Gibbs sampler.
+
+(a1) Sample $(\boldsymbol{\omega}~\vert~\boldsymbol{\beta}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{sExp}(b_1)$
+
+(a2) Sample $(\beta_{i}~\vert~ \boldsymbol{\beta}_{(i)},\boldsymbol{\omega}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{U}(-\omega_{i}^{1/\nu},\omega_{i}^{1/\nu})$ with MH correction for $i \in I$.
+
+(a3) Sample $(\boldsymbol{\beta}_{J}~\vert~ \boldsymbol{\beta}_{I}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{N}(\boldsymbol{\mu}_{J|I},\boldsymbol{V}_{J|I})$.
 
 --
 
-We can fix $\vert J \vert^{3}$ by selection $\epsilon$ adaptively then it is $\mathcal{O}(p^2)$.
+**Complexity**: $\mathcal{O}(\vert J \vert^{3} + p \vert I\vert)$ in each iteration.
 
 --
+
+We can fix $\vert J \vert^{3}$ by selection $\epsilon$ adaptively then complexity is $\mathcal{O}(p^2)$.
 
 ---
 
