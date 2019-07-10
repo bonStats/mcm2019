@@ -146,6 +146,7 @@ The duality between stochastic constraint priors and their standard representati
 - Slice sampling
 - Skew random variables
 - Exponentially tilted random variables
+- Latent variable approaches
 
 <!---#### Base prior: 
 
@@ -320,7 +321,7 @@ knitr::include_graphics("imgs/sc-rej-shape-only.png")
 
 --
 
-Inverting $\boldsymbol{V}$ (or decomposing) is $\mathcal{O}(p^3)$.
+**A:** Inverting (or decomposing) $\boldsymbol{V}$ is $\mathcal{O}(p^3)$.
 
 ---
 
@@ -328,18 +329,53 @@ Inverting $\boldsymbol{V}$ (or decomposing) is $\mathcal{O}(p^3)$.
 
 ### Truncated-Gibbs sampler
 
-**Aim**: Exploit the geometry learned by decomposing the prior to create a better Gibbs sampler.
+**Aim**: Exploit the geometry by decomposing the prior to create a better Gibbs sampler.
 
 --
 
 (a1) Sample $(\boldsymbol{\omega}~\vert~\boldsymbol{\beta}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{sExp}(b_1)$
+
+--
+
+   - Use $\boldsymbol{\omega}$ (current magnitude) to choose appropriate sampling step, namely
+
+--
    
-   - Use information about current magnitude to infer
-
-(a2)
+   - Order $\boldsymbol{\omega}$ by size and split into two groups, $I$ and $J$. Where $\omega_{i} \leq \epsilon$ for $i \in I$.
 
 
-**Complexity**:
+--
+
+(a2) Sample $(\beta_{i}~\vert~ \boldsymbol{\beta}_{(i)},\boldsymbol{\omega}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{U}(-\omega_{i}^{1/\nu},\omega_{i}^{1/\nu})$ with MH correction.
+
+--
+
+   - The dependence on $\boldsymbol{\beta}_{(i)}$ exists but is very small. You can argue that $(\beta_{i}~\vert~ \boldsymbol{\beta}_{(i)},\boldsymbol{\omega}, \boldsymbol{\lambda}, \sigma^2, \tau) \overset{d}{\approx} (\beta_{i}~\vert~\boldsymbol{\omega}, \boldsymbol{\lambda}, \sigma^2, \tau)$ if $\epsilon$ is small enough.
+
+--
+
+(a3) Sample $(\boldsymbol{\beta}_{J}~\vert~ \boldsymbol{\beta}_{I}, \boldsymbol{\lambda}, \sigma^2, \tau) \sim \text{N}(\boldsymbol{\mu}_{J|I},\boldsymbol{V}_{J|I})$.
+
+   - Note: $\boldsymbol{\omega}$ marginalised out. Not neccesary, but practical.
+
+
+**Complexity**: $\mathcal{O}(\vert J \vert^{3} + p \vert I\vert)$.
+
+--
+
+We can fix $\vert J \vert^{3}$ by selection $\epsilon$ adaptively then it is $\mathcal{O}(p^2)$.
+
+--
+
+---
+
+This only works because in the high dimesional setting with shrinkage priors the majority of coefficients are forced to be very close to zero.
+<br><br>
+```{r more-aqua, echo=FALSE, eval=TRUE, fig.align='center'}
+knitr::include_graphics("imgs/aquaman-jetski.gif")
+```
+--
+Understanding the structure and geometry of the problem is important!
 
 ---
 
