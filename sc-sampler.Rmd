@@ -97,7 +97,8 @@ $$\max_{\tilde{\boldsymbol{\theta}} \in \mathbb{R}^{p}} \log \pi(\boldsymbol{x} 
 to a Bayesian problem by setting priors
 <br><br>
 $$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad
-\tilde{\omega} \sim \text{Exp}(\lambda)$$
+\tilde{\omega} \sim \text{Exp}(\lambda)\qquad
+\text{s.t.}\qquad \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}$$
 <br>
 just as we had with stochastic constraints.
 <!--- 
@@ -123,9 +124,13 @@ The duality between stochastic constraint priors and their standard representati
 
 ---
 
-## Stochastic constraint framework
+## General stochastic constraint framework
 
-### Components 
+For continuous random variables:
+
+$$p(\boldsymbol{\theta},\boldsymbol{\omega}) \propto f_{\tilde{\boldsymbol{\theta}}}(\boldsymbol{\theta})~f_{\tilde{\boldsymbol{\omega}}}(\boldsymbol{\omega})~1(\boldsymbol{r}(\boldsymbol{\theta}) \preceq \boldsymbol{\omega})$$
+
+--
 
 |||
 |-------------------------|--------------|
@@ -135,11 +140,13 @@ The duality between stochastic constraint priors and their standard representati
 
 --
 
-$$f_{\tilde{\boldsymbol{\theta}}}(\boldsymbol{\theta})~f_{\tilde{\boldsymbol{\omega}}}(\boldsymbol{\omega})~1(\boldsymbol{r}(\boldsymbol{\theta}) \preceq \boldsymbol{\omega})  $$
+**Key ideas**: 
+
+- Truncation is applied *jointly* to base and constraint variables.
 
 --
 
-**Key idea**: Truncation is applied *jointly* to base and constraint variables.
+- Decomposition exposes marginal and multivariate components of the prior.
 
 --
 
@@ -160,9 +167,8 @@ $\tilde{\boldsymbol{\omega}} \sim f_{\tilde{\boldsymbol{\omega}}}, \quad \tilde{
     
 #### Penalty function: 
 
-$\boldsymbol{r}(\boldsymbol{\theta}): \Theta \rightarrow \Omega$ -->
+$\boldsymbol{r}(\boldsymbol{\theta}): \Theta \rightarrow \Omega$ 
 
----
 
 ## Stochastic constraint framework
 
@@ -173,7 +179,7 @@ $$(\boldsymbol{\theta}, \boldsymbol{\omega} \vert \boldsymbol{\lambda}) \overset
 $$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}}$$ 
 $$(\tilde{\boldsymbol{\omega}} \vert \boldsymbol{\lambda}) \sim f_{\tilde{\boldsymbol{\omega}}  \vert \boldsymbol{\lambda}}$$
 
-The joint support of the joint distribution $(\tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}})$ is constrained element-wise by the inequality $\boldsymbol{r}(\tilde{\boldsymbol{\theta}} ) \preceq \tilde{\boldsymbol{\omega}}$.
+The joint support of the joint distribution $(\tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}})$ is constrained element-wise by the inequality $\boldsymbol{r}(\tilde{\boldsymbol{\theta}} ) \preceq \tilde{\boldsymbol{\omega}}$.-->
 
 
 ---
@@ -244,7 +250,9 @@ Similar representations exist for
 
 ## Stochastic nets
 
-I refer to the family of stochastic constraint priors that contain continuous shrinkage priors (horseshoe etc.) as *stochastic nets*.
+- A restricted family of stochastic constraint priors contain all(?) continuous shrinkage priors (horseshoe etc.) in the Bayesian literature.
+
+- I refer to these as *stochastic nets*.
 
 **... why?**
 
@@ -296,7 +304,7 @@ knitr::include_graphics("imgs/sc-rej-shape-only.png")
 
 ## Gibbs samplers for continuous-shrinkage priors
 
-**Normal model**: $(\boldsymbol{y} ~\vert~ \boldsymbol{X}, \boldsymbol{\beta},\sigma^2) \sim \text{N}(\boldsymbol{X} \boldsymbol{\beta}, \sigma^2)$.
+**Normal model**: $(\boldsymbol{y} ~\vert~ \boldsymbol{X}, \boldsymbol{\beta},\sigma^2) \sim \text{N}(\boldsymbol{X} \boldsymbol{\beta}, \sigma^2\boldsymbol{I})$.
 
 --
 
@@ -383,11 +391,15 @@ knitr::include_graphics("imgs/sc-rej-shape-only.png")
 
 --
 
-**Complexity**: $\mathcal{O}(\vert J \vert^{3} + p \vert I\vert)$ in each iteration.
+**Complexity**: 
+
+- $\mathcal{O}(\vert J \vert^{3} + p \vert I\vert)$ in each iteration.
 
 --
 
-We can fix $\vert J \vert^{3}$ by selection $\epsilon$ adaptively then complexity is $\mathcal{O}(p^2)$.
+- We can fix $\vert J \vert$ by selecting $\epsilon$ adaptively.
+
+- Then the complexity is $\mathcal{O}(p^2)$.
 
 ---
 
@@ -414,17 +426,30 @@ knitr::include_graphics("imgs/aquaman-jetski.gif")
 - $\rho \in \{0.1,0.5\}$, controls correlation in $\boldsymbol{X}$
 - $\epsilon \in \{0.1,0.2\}$
 - $\boldsymbol{\beta} = [\boldsymbol{0}_{10}^{\top}~\boldsymbol{b}_{1}^{\top}~\boldsymbol{0}_{30}^{\top}~~\boldsymbol{b}_{2}^{\top}~\boldsymbol{0}_{p-50}^{\top}]^{\top}$
+- $\boldsymbol{b}_{1} = [2,~2,−5,−5,−5]$
+- $\boldsymbol{b}_{2} = [−2,−2,−2,~5,~5]$
+
+- $2000$ samples repeated independently 100 times.
+
 ---
 
 ## Results on some toy problems
 
-### Results:
+### Posterior mean (SD) of coefficient SSE
+
+```{r sse-table, echo=FALSE, eval=TRUE, fig.align='center'}
+knitr::include_graphics("imgs/table-sse.png")
+```
 
 ---
 
 ## Results on some toy problems
 
-### Time:
+### Mean (SD) computation time
+
+```{r time-table, echo=FALSE, eval=TRUE, fig.align='center'}
+knitr::include_graphics("imgs/table-sse.png")
+```
 
 ---
 

@@ -84,7 +84,8 @@ This looks suspiciously like changing the constrained Lasso
 to a Bayesian problem by setting priors
 &lt;br&gt;&lt;br&gt;
 `$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}} \propto 1 \qquad
-\tilde{\omega} \sim \text{Exp}(\lambda)$$`
+\tilde{\omega} \sim \text{Exp}(\lambda)\qquad
+\text{s.t.}\qquad \Vert \tilde{\boldsymbol{\theta}} \Vert_{1} \leq \tilde{\omega}$$`
 &lt;br&gt;
 just as we had with stochastic constraints.
 &lt;!--- 
@@ -110,9 +111,13 @@ The duality between stochastic constraint priors and their standard representati
 
 ---
 
-## Stochastic constraint framework
+## General stochastic constraint framework
 
-### Components 
+For continuous random variables:
+
+`$$p(\boldsymbol{\theta},\boldsymbol{\omega}) \propto f_{\tilde{\boldsymbol{\theta}}}(\boldsymbol{\theta})~f_{\tilde{\boldsymbol{\omega}}}(\boldsymbol{\omega})~1(\boldsymbol{r}(\boldsymbol{\theta}) \preceq \boldsymbol{\omega})$$`
+
+--
 
 |||
 |-------------------------|--------------|
@@ -122,11 +127,13 @@ The duality between stochastic constraint priors and their standard representati
 
 --
 
-$$f_{\tilde{\boldsymbol{\theta}}}(\boldsymbol{\theta})~f_{\tilde{\boldsymbol{\omega}}}(\boldsymbol{\omega})~1(\boldsymbol{r}(\boldsymbol{\theta}) \preceq \boldsymbol{\omega})  $$
+**Key ideas**: 
+
+- Truncation is applied *jointly* to base and constraint variables.
 
 --
 
-**Key idea**: Truncation is applied *jointly* to base and constraint variables.
+- Decomposition exposes marginal and multivariate components of the prior.
 
 --
 
@@ -147,9 +154,8 @@ $$f_{\tilde{\boldsymbol{\theta}}}(\boldsymbol{\theta})~f_{\tilde{\boldsymbol{\om
     
 #### Penalty function: 
 
-`\(\boldsymbol{r}(\boldsymbol{\theta}): \Theta \rightarrow \Omega\)` --&gt;
+`\(\boldsymbol{r}(\boldsymbol{\theta}): \Theta \rightarrow \Omega\)` 
 
----
 
 ## Stochastic constraint framework
 
@@ -160,7 +166,7 @@ $$f_{\tilde{\boldsymbol{\theta}}}(\boldsymbol{\theta})~f_{\tilde{\boldsymbol{\om
 `$$\tilde{\boldsymbol{\theta}} \sim f_{\tilde{\boldsymbol{\theta}}}$$` 
 `$$(\tilde{\boldsymbol{\omega}} \vert \boldsymbol{\lambda}) \sim f_{\tilde{\boldsymbol{\omega}}  \vert \boldsymbol{\lambda}}$$`
 
-The joint support of the joint distribution `\((\tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}})\)` is constrained element-wise by the inequality `\(\boldsymbol{r}(\tilde{\boldsymbol{\theta}} ) \preceq \tilde{\boldsymbol{\omega}}\)`.
+The joint support of the joint distribution `\((\tilde{\boldsymbol{\theta}}, \tilde{\boldsymbol{\omega}})\)` is constrained element-wise by the inequality `\(\boldsymbol{r}(\tilde{\boldsymbol{\theta}} ) \preceq \tilde{\boldsymbol{\omega}}\)`.--&gt;
 
 
 ---
@@ -223,7 +229,9 @@ Similar representations exist for
 
 ## Stochastic nets
 
-I refer to the family of stochastic constraint priors that contain continuous shrinkage priors (horseshoe etc.) as *stochastic nets*.
+- A restricted family of stochastic constraint priors contain all(?) continuous shrinkage priors (horseshoe etc.) in the Bayesian literature.
+
+- I refer to these as *stochastic nets*.
 
 **... why?**
 
@@ -267,7 +275,7 @@ I refer to the family of stochastic constraint priors that contain continuous sh
 
 ## Gibbs samplers for continuous-shrinkage priors
 
-**Normal model**: `\((\boldsymbol{y} ~\vert~ \boldsymbol{X}, \boldsymbol{\beta},\sigma^2) \sim \text{N}(\boldsymbol{X} \boldsymbol{\beta}, \sigma^2)\)`.
+**Normal model**: `\((\boldsymbol{y} ~\vert~ \boldsymbol{X}, \boldsymbol{\beta},\sigma^2) \sim \text{N}(\boldsymbol{X} \boldsymbol{\beta}, \sigma^2\boldsymbol{I})\)`.
 
 --
 
@@ -354,11 +362,15 @@ I refer to the family of stochastic constraint priors that contain continuous sh
 
 --
 
-**Complexity**: `\(\mathcal{O}(\vert J \vert^{3} + p \vert I\vert)\)` in each iteration.
+**Complexity**: 
+
+- `\(\mathcal{O}(\vert J \vert^{3} + p \vert I\vert)\)` in each iteration.
 
 --
 
-We can fix `\(\vert J \vert^{3}\)` by selection `\(\epsilon\)` adaptively then complexity is `\(\mathcal{O}(p^2)\)`.
+- We can fix `\(\vert J \vert\)` by selecting `\(\epsilon\)` adaptively.
+
+- Then the complexity is `\(\mathcal{O}(p^2)\)`.
 
 ---
 
@@ -383,17 +395,26 @@ We can fix `\(\vert J \vert^{3}\)` by selection `\(\epsilon\)` adaptively then c
 - `\(\rho \in \{0.1,0.5\}\)`, controls correlation in `\(\boldsymbol{X}\)`
 - `\(\epsilon \in \{0.1,0.2\}\)`
 - `\(\boldsymbol{\beta} = [\boldsymbol{0}_{10}^{\top}~\boldsymbol{b}_{1}^{\top}~\boldsymbol{0}_{30}^{\top}~~\boldsymbol{b}_{2}^{\top}~\boldsymbol{0}_{p-50}^{\top}]^{\top}\)`
+- `\(\boldsymbol{b}_{1} = [2,~2,−5,−5,−5]\)`
+- `\(\boldsymbol{b}_{2} = [−2,−2,−2,~5,~5]\)`
+
+- `\(2000\)` samples repeated independently 100 times.
+
 ---
 
 ## Results on some toy problems
 
-### Results:
+### Posterior mean (SD) of coefficient SSE
+
+&lt;img src="imgs/table-sse.png" width="1563" style="display: block; margin: auto;" /&gt;
 
 ---
 
 ## Results on some toy problems
 
-### Time:
+### Mean (SD) computation time
+
+&lt;img src="imgs/table-sse.png" width="1563" style="display: block; margin: auto;" /&gt;
 
 ---
 
