@@ -120,7 +120,8 @@ just as we had with stochastic constraints.
 --
 
 <br><br>
-The duality between stochastic constraint priors and their standard representation is analagous to the duality between penalty and constraint regularisation in optimisation.
+<!--- The duality between stochastic constraint priors and their standard representation is analagous to the duality between penalty and constraint regularisation in optimisation.--->
+There is a duality in the optimisation setting, *and for the priors in a Bayesian analysis*.
 
 ---
 
@@ -152,7 +153,7 @@ $$p(\boldsymbol{\theta},\boldsymbol{\omega}) \propto f_{\tilde{\boldsymbol{\thet
 
 **Connections**
 
-- Scale mixture of normals/uniforms and other latent variable approaches
+- Scale mixture of normal/uniform and other latent variable approaches
 - Slice sampling
 - Skew random variables
 - Exponentially tilted random variables
@@ -372,7 +373,7 @@ knitr::include_graphics("imgs/sc-rej-shape-only.png")
 
 --
 
-   - Note: $\boldsymbol{\omega}$ marginalised out. Not neccesary, but practical.
+   - Note: $\boldsymbol{\omega}$ marginalised out. Not necessary, but practical.
 
 
 ---
@@ -403,7 +404,7 @@ knitr::include_graphics("imgs/sc-rej-shape-only.png")
 
 ---
 
- - In high dimesions with shrinkage priors, the majority of coefficients are forced to be very close to zero.
+ - In high dimensions with shrinkage priors, the majority of coefficients are forced to be very close to zero.
  
 --
  
@@ -457,7 +458,7 @@ knitr::include_graphics("imgs/table-sse.png")
 
 - Other areas under investigation:
 
-   - Theorectical results
+   - Theoretical results
 
    - Prior construction
    
