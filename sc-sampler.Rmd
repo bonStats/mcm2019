@@ -494,4 +494,17 @@ knitr::include_graphics("imgs/table-time.png")
 
 ---
 
-<!--- ## References --->
+## (A random sample of) Key references
+
+```{r bib-list, echo = FALSE, results='asis'}
+
+s_cites <- sample(names(myBib), size = 4)
+
+for(s in s_cites){
+  
+  p <- NoCite(bib = myBib,  s)
+  
+}
+
+RefManageR::PrintBibliography(myBib)
+```
