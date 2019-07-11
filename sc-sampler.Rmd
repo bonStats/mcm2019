@@ -151,12 +151,7 @@ $$p(\boldsymbol{\theta},\boldsymbol{\omega}) \propto f_{\tilde{\boldsymbol{\thet
 
 --
 
-**Connections**
-
-- Scale mixture of normal/uniform and other latent variable approaches
-- Slice sampling
-- Skew random variables
-- Exponentially tilted random variables
+**Connections**: Scale mixture of normal/uniform, slice sampling, skew random variables, exponentially tilted random variables,...
 
 <!---#### Base prior: 
 
@@ -398,19 +393,21 @@ knitr::include_graphics("imgs/sc-rej-shape-only.png")
 
 --
 
-- We can fix $\vert J \vert$ by selecting $\epsilon$ adaptively.
-
-- Then the complexity is $\mathcal{O}(p^2)$.
+- We can fix $\vert J \vert$ by selecting $\epsilon$ adaptively. Then the complexity is $\mathcal{O}(p^2)$.
 
 ---
 
- - In high dimensions with shrinkage priors, the majority of coefficients are forced to be very close to zero.
+- In high dimensions with shrinkage priors, the majority of coefficients are forced to be very close to zero.
  
 --
  
- - Understanding the structure and geometry of the problem is important!
-<br><br>
+- Understanding the structure and geometry of the problem is important!
 
+
+--
+
+Be like Aquaman!
+<br><br>
 ```{r more-aqua, echo=FALSE, eval=TRUE, fig.align='center'}
 knitr::include_graphics("imgs/aquaman-jetski.gif")
 ```
@@ -419,51 +416,82 @@ knitr::include_graphics("imgs/aquaman-jetski.gif")
 
 ## Results on some toy problems
 
-### Model
+Model: Linear regression, iid Gaussian errors, using R2-D2 prior
 
-- Normal regression model with R2-D2 prior
-- $n = 100$
-- $p \in \{500,1000,2500,5000\}$
-- $\rho \in \{0.1,0.5\}$, controls correlation in $\boldsymbol{X}$
-- $\epsilon \in \{0.1,0.2\}$
-- $\boldsymbol{\beta} = [\boldsymbol{0}_{10}^{\top}~\boldsymbol{b}_{1}^{\top}~\boldsymbol{0}_{30}^{\top}~~\boldsymbol{b}_{2}^{\top}~\boldsymbol{0}_{p-50}^{\top}]^{\top}$
-- $\boldsymbol{b}_{1} = [2,~2,−5,−5,−5]$
-- $\boldsymbol{b}_{2} = [−2,−2,−2,~5,~5]$
+Simulation settings:
 
-- $2000$ samples repeated independently 100 times.
+$n = 100$
 
----
+$p \in \{500,1000,2500,5000\}$
 
-## Results on some toy problems
+$\rho \in \{0.1,0.5\}$, controls correlation in $\boldsymbol{X}$
 
-### Posterior mean (SD) of coefficient SSE
+$\epsilon \in \{0.1,0.2\}$
 
-```{r sse-table, echo=FALSE, eval=TRUE, fig.align='center'}
-knitr::include_graphics("imgs/table-sse.png")
-```
+$\boldsymbol{\beta} = [\boldsymbol{0}_{10}^{\top}~\boldsymbol{b}_{1}^{\top}~\boldsymbol{0}_{30}^{\top}~~\boldsymbol{b}_{2}^{\top}~\boldsymbol{0}_{p-50}^{\top}]^{\top}$
+
+$\boldsymbol{b}_{1} = [2,~2,−5,−5,−5]$
+
+$\boldsymbol{b}_{2} = [−2,−2,−2,~5,~5]$
+
+$2000$ samples repeated independently 100 times.
 
 ---
-
-## Results on some toy problems
 
 ### Mean (SD) computation time
 
-```{r time-table, echo=FALSE, eval=TRUE, fig.align='center'}
+```{r comp-viz, echo=FALSE, eval=TRUE, fig.align='center', out.height=500, out.width=500}
+knitr::include_graphics("imgs/avg-computation-time.png")
+```
+
+---
+
+### Posterior mean (SD) of coefficient SSE
+
+```{r sse-table, echo=FALSE, eval=TRUE, fig.align='center', out.height=500}
 knitr::include_graphics("imgs/table-sse.png")
 ```
 
 ---
 
+### Grouping and uniform proposal
+
+```{r accept-table, echo=FALSE, eval=TRUE, fig.align='center', out.height=500,out.width=550}
+knitr::include_graphics("imgs/table-mh-accept.png")
+```
+
+---
+
+<!---### Mean (SD) computation time
+
+```{r time-table, echo=FALSE, eval=TRUE, fig.align='center', out.height=550,out.width=450}
+knitr::include_graphics("imgs/table-time.png")
+``` 
+--->
+
 ## Conclusions
 
-- Other areas under investigation:
+- One technique for scaling with dimension where sparsity is desired.
+
+- Can be combined with other techniques
+
+- Other areas under investigation with stochastic constraints:
 
    - Theoretical results
+   
+   - Discrete version
 
    - Prior construction
    
    - Variable selection from continuous-shrinkage prior
+   
+   - You tell me!
+   
+- Acknowledgements: 
+
+   - Berwin Turlach, Kevin Murray, Chris Drovandi
+   - Pawsey HPC
 
 ---
 
-## References
+<!--- ## References --->
