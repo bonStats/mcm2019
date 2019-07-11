@@ -371,8 +371,6 @@ knitr::include_graphics("imgs/sc-rej-shape-only.png")
 
 ---
 
-## Gibbs samplers for continuous-shrinkage priors
-
 ### Truncated-Gibbs sampler
 
 **Aim**: Exploit the geometry by decomposing the prior to create a better Gibbs sampler.
@@ -496,7 +494,7 @@ knitr::include_graphics("imgs/table-time.png")
 
 ```{r bib-list, echo = FALSE, results='asis'}
 
-s_cites <- sample(names(myBib), size = 4)
+s_cites <- sample(names(myBib), size = 6)
 
 for(s in s_cites){
   
