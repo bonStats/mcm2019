@@ -75,7 +75,7 @@ cat("<br><br><br> see ",Citet("Tibshirani1996", bib = myBib))
 ### Standard probabilistic model:
 
 $$(\boldsymbol{x}|\boldsymbol{\theta}) \sim \pi(\boldsymbol{x}|\boldsymbol{\theta})$$
-$$\boldsymbol{\theta} \overset{\text{iid}}{\sim} \text{Exp}(\lambda)$$
+$$\boldsymbol{\theta} \overset{\text{iid}}{\sim} \text{DExp}(\lambda)$$
 
 ### Constrained probabilistic model:
 
